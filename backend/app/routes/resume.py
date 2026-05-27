@@ -91,6 +91,14 @@ async def analyze_resume_route(
                 "createdAt": datetime.now(timezone.utc),
             }
         )
+        await activity_log.insert_one(
+            {
+                "userId": userId,
+                "type": "insight",
+                "text": f"ATS score {analysis.get('ats_score', 0)}% achieved for {target_role}",
+                "createdAt": datetime.now(timezone.utc),
+            }
+        )
     except Exception:
         logger.exception("Failed to persist resume analysis for user %s", userId)
 

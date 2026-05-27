@@ -50,6 +50,14 @@ async def complete_interview(data: CompleteInterviewRequest):
                 "createdAt": datetime.now(timezone.utc),
             }
         )
+        await activity_log.insert_one(
+            {
+                "userId": data.userId,
+                "type": "insight",
+                "text": f"{data.interview_type} interview completed at {data.company} with avg score {avg_score}/100",
+                "createdAt": datetime.now(timezone.utc),
+            }
+        )
     except Exception:
         logger.exception("Failed to persist interview session for user %s", data.userId)
 

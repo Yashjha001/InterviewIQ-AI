@@ -7,7 +7,10 @@ from fastapi import (
 
 import pdfplumber
 import os
+import logging
+from datetime import datetime, timezone
 
+from app.db.mongodb import activity_log, resume_reports
 from app.services.resume_parser import extract_skills
 
 from app.services.resume_analysis import (
@@ -17,13 +20,16 @@ from app.services.resume_analysis import (
 
 router = APIRouter()
 
+logger = logging.getLogger(__name__)
+
 UPLOAD_FOLDER = "uploads"
 
 
 @router.post("/analyze-resume")
 async def analyze_resume_route(
     file: UploadFile = File(...),
-    target_role: str = Form(...)
+    target_role: str = Form(...),
+    userId: str = Form(...)
 ):
 
     file_path = os.path.join(
@@ -58,6 +64,37 @@ async def analyze_resume_route(
         analysis["matched_skills"],
         analysis["missing_skills"]
     )
+
+    try:
+        await resume_reports.insert_one(
+            {
+                "userId": userId,
+                "target_role": target_role,
+                "ats_score": int(analysis.get("ats_score", 0)),
+                "matched_skills": analysis.get("matched_skills", []),
+                "missing_skills": analysis.get("missing_skills", []),
+                "feedback": feedback,
+                "createdAt": datetime.now(timezone.utc),
+            }
+        )
+        await activity_log.insert_one(
+            {
+                "userId": userId,
+                "action": "Resume Analyzed",
+                "detail": f"ATS Score: {analysis.get('ats_score', 0)}% for {target_role}",
+                "createdAt": datetime.now(timezone.utc),
+            }
+        )
+        await activity_log.insert_one(
+            {
+                "userId": userId,
+                "type": "insight",
+                "text": f"ATS score {analysis.get('ats_score', 0)}% achieved for {target_role}",
+                "createdAt": datetime.now(timezone.utc),
+            }
+        )
+    except Exception:
+        logger.exception("Failed to persist resume analysis for user %s", userId)
 
     return {
         "filename": file.filename,
