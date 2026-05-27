@@ -1,16 +1,40 @@
-import './globals.css';
-import type { Metadata } from 'next';
-import React from 'react';
+import type { Metadata } from "next";
+
+import "./globals.css";
+
+import Navbar from "@/components/Navbar";
+
+import SessionProviderWrapper from "@/components/SessionProviderWrapper";
 
 export const metadata: Metadata = {
-  title: 'InterviewIQ AI',
-  description: 'AI-powered interview preparation platform',
+
+  title: "InterviewIQ AI",
+
+  description: "AI Career Growth Platform",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+
   return (
+
     <html lang="en">
-      <body>{children}</body>
+
+      <body>
+
+        <SessionProviderWrapper>
+
+          <Navbar />
+
+          {children}
+
+        </SessionProviderWrapper>
+
+      </body>
+
     </html>
   );
 }
