@@ -1,13 +1,17 @@
-import Link from 'next/link';
-
-export default function HomePage() {
+export default function Home() {
   return (
-    <main style={{ padding: 24 }}>
-      <h1>InterviewIQ AI</h1>
-      <p>Welcome to the starter frontend structure.</p>
-      <nav>
-        <Link href="/login">Login</Link> | <Link href="/dashboard">Dashboard</Link>
-      </nav>
+    <main className="min-h-screen flex flex-col items-center justify-center">
+      <h1 className="text-5xl font-bold">
+        InterviewIQ AI
+      </h1>
+
+      <p className="mt-4 text-gray-500">
+        AI Powered Interview Preparation Platform
+      </p>
+
+      <button className="mt-6 px-6 py-3 bg-black text-white rounded-xl">
+        Start Interview
+      </button>
     </main>
   );
 }

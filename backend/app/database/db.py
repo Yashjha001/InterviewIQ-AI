@@ -1,8 +1,11 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base, sessionmaker
+from pymongo import MongoClient
+from dotenv import load_dotenv
+import os
 
-DATABASE_URL = "sqlite:///./interviewiq.db"
+load_dotenv()
 
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-Base = declarative_base()
+MONGO_URI = os.getenv("MONGO_URI")
+
+client = MongoClient(MONGO_URI)
+
+db = client["interviewiq"]
