@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -145,10 +148,28 @@ function BulletList({ items, accent }: { items: string[]; accent: string }) {
 
 export default function ResumeAnalysisPage() {
   const [file, setFile] = useState<File | null>(null);
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [targetRole, setTargetRole] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<ResultData | null>(null);
   const [dragOver, setDragOver] = useState(false);
+
+  const userId = session?.user?.id || session?.user?.email || "";
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.replace("/login");
+    }
+  }, [status, router]);
+
+  if (status === "loading" || status === "unauthenticated") {
+    return (
+      <main className="min-h-screen bg-black text-white flex items-center justify-center">
+        <h1 className="text-3xl font-bold">Loading...</h1>
+      </main>
+    );
+  }
 
   const handleAnalyze = async () => {
     if (!file || !targetRole.trim()) {
@@ -160,6 +181,7 @@ export default function ResumeAnalysisPage() {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("target_role", targetRole);
+    formData.append("userId", userId);
     try {
       const response = await fetch("http://127.0.0.1:8000/analyze-resume", {
         method: "POST",

@@ -1,22 +1,39 @@
 "use client";
 
 import { useState } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 import ReactMarkdown from "react-markdown";
 
 export default function CareerRoadmapPage() {
 
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
   const [currentYear, setCurrentYear] = useState("");
-
   const [currentSkills, setCurrentSkills] = useState("");
-
   const [careerGoal, setCareerGoal] = useState("");
-
   const [timeline, setTimeline] = useState("");
-
   const [loading, setLoading] = useState(false);
-
   const [roadmap, setRoadmap] = useState("");
+
+  const userId = session?.user?.id || session?.user?.email || "";
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login");
+    }
+  }, [status, router]);
+
+  if (status === "loading" || status === "unauthenticated") {
+    return (
+      <div style={{ color: "white", padding: "40px", textAlign: "center" }}>
+        Loading...
+      </div>
+    );
+  }
 
   const handleGenerateRoadmap = async () => {
 
@@ -42,6 +59,7 @@ export default function CareerRoadmapPage() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
+            userId: userId,
             current_year: currentYear,
             current_skills: currentSkills,
             career_goal: careerGoal,

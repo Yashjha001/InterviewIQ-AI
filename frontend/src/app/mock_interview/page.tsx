@@ -1,6 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -197,6 +200,8 @@ function FeedbackPanel({ feedback }: { feedback: FeedbackData }) {
 
 export default function MockInterviewPage() {
   const [file, setFile] = useState<File | null>(null);
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [targetRole, setTargetRole] = useState("");
   const [company, setCompany] = useState("");
   const [difficulty, setDifficulty] = useState("");
@@ -212,6 +217,22 @@ export default function MockInterviewPage() {
   const [interviewEnded, setInterviewEnded] = useState(false);
   const [dragOver, setDragOver] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+
+  const userId = session?.user?.id || session?.user?.email || "";
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.replace("/login");
+    }
+  }, [status, router]);
+
+  if (status === "loading" || status === "unauthenticated") {
+    return (
+      <main className="min-h-screen bg-black text-white flex items-center justify-center">
+        <h1 className="text-3xl font-bold">Loading...</h1>
+      </main>
+    );
+  }
 
   const questionNumber = interviewHistory.length + 1;
   const diffStyle = difficulty ? getDifficultyColor(difficulty) : { color: "#71717a", bg: "transparent", border: "transparent" };
@@ -230,6 +251,7 @@ export default function MockInterviewPage() {
     formData.append("company", company);
     formData.append("interview_type", interviewType);
     formData.append("difficulty", difficulty);
+    formData.append("userId", userId);
     try {
       const res = await fetch("http://127.0.0.1:8000/generate-interview", { method: "POST", body: formData });
       const data = await res.json();
@@ -311,10 +333,35 @@ export default function MockInterviewPage() {
 
   // ── End Interview ─────────────────────────────────────────────────────────
 
-  const handleEndInterview = () => {
-    setInterviewEnded(true);
-    setInterviewStarted(false);
-    setIsThinking(false);
+  const handleEndInterview = async () => {
+    try {
+      const completionPayload = {
+        userId,
+        target_role: targetRole,
+        company,
+        interview_type: interviewType,
+        difficulty,
+        questions: questions.map((question) => getQuestionText(question)),
+        answers: interviewHistory.map((entry) => entry.answer),
+        scores: interviewHistory.map((entry) => {
+          const parsed = parseFeedback(entry.feedback);
+          return parsed?.score ? Math.round(parsed.score) : 0;
+        }),
+        feedback: interviewHistory.map((entry) => entry.feedback),
+      };
+
+      await fetch("http://127.0.0.1:8000/complete-interview", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(completionPayload),
+      });
+    } catch {
+      alert("Failed to save interview session.");
+    } finally {
+      setInterviewEnded(true);
+      setInterviewStarted(false);
+      setIsThinking(false);
+    }
   };
 
   const handleRestart = () => {

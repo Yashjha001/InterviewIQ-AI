@@ -3,12 +3,15 @@ import { MongoClient } from "mongodb";
 const uri = process.env.MONGODB_URI!;
 
 const client = new MongoClient(uri);
+let clientPromise: Promise<MongoClient> | null = null;
 
 export async function connectDB() {
 
-  if (!client.topology?.isConnected()) {
-    await client.connect();
+  if (!clientPromise) {
+    clientPromise = client.connect();
   }
 
-  return client.db();
+  const connectedClient = await clientPromise;
+
+  return connectedClient.db();
 }
