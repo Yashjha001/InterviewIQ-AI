@@ -55,6 +55,7 @@ type StatCardProps = {
 };
 
 const CACHE_TTL = 60;
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 function fetchWithCache(url: string) {
   const cacheKey = `dashboard_cache_${url}`;
@@ -265,8 +266,8 @@ export default function DashboardPage() {
     setStatsError(null);
     setDetailsError(null);
 
-    const statsUrl = `http://127.0.0.1:8000/dashboard-data/stats?userId=${encodeURIComponent(userId)}`;
-    const detailsUrl = `http://127.0.0.1:8000/dashboard-data/details?userId=${encodeURIComponent(userId)}`;
+    const statsUrl = `${API_URL}/dashboard-data/stats?userId=${encodeURIComponent(userId)}`;
+    const detailsUrl = `${API_URL}/dashboard-data/details?userId=${encodeURIComponent(userId)}`;
 
     const statsPromise = fetchWithCache(statsUrl)
       .then((data) => {

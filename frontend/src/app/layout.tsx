@@ -7,6 +7,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 
 import SessionProviderWrapper from "@/components/SessionProviderWrapper";
+import KeepAlive from "@/components/KeepAlive";
 
 export const metadata: Metadata = {
 
@@ -40,6 +41,8 @@ export default function RootLayout({
       <body className={`${dmSans.variable} ${dmMono.variable}`}>
 
         <SessionProviderWrapper>
+
+          <KeepAlive />
 
           <Navbar />
 

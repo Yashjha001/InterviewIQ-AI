@@ -253,7 +253,7 @@ export default function MockInterviewPage() {
     formData.append("difficulty", difficulty);
     formData.append("userId", userId);
     try {
-      const res = await fetch("http://127.0.0.1:8000/generate-interview", { method: "POST", body: formData });
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/generate-interview`, { method: "POST", body: formData });
       const data = await res.json();
       const generated = data.questions || data.interview_questions || [];
       if (generated.length > 0) {
@@ -284,7 +284,7 @@ export default function MockInterviewPage() {
     setLoading(true);
     setFeedback(null);
     try {
-      const evalRes = await fetch("http://127.0.0.1:8000/evaluate-answer", {
+      const evalRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/evaluate-answer`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ question: questionText, answer }),
@@ -304,7 +304,7 @@ export default function MockInterviewPage() {
 
       setIsThinking(true);
 
-      const nextRes = await fetch("http://127.0.0.1:8000/next-question", {
+      const nextRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/next-question`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -350,7 +350,7 @@ export default function MockInterviewPage() {
         feedback: interviewHistory.map((entry) => entry.feedback),
       };
 
-      await fetch("http://127.0.0.1:8000/complete-interview", {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/complete-interview`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(completionPayload),

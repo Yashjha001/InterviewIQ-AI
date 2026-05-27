@@ -1,3 +1,5 @@
+import os
+
 from fastapi import FastAPI
 from app.routes.resume import router as resume_router
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,7 +11,11 @@ from app.routes.interview import router as interview_router
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:3001",
+        os.getenv("FRONTEND_URL", "*"),
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -25,3 +31,8 @@ def home():
     return {
         "message": "InterviewIQ Backend Running"
     }
+
+
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}

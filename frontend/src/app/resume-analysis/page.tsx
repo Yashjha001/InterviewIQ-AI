@@ -183,7 +183,7 @@ export default function ResumeAnalysisPage() {
     formData.append("target_role", targetRole);
     formData.append("userId", userId);
     try {
-      const response = await fetch("http://127.0.0.1:8000/analyze-resume", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/analyze-resume`, {
         method: "POST",
         body: formData,
       });

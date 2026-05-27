@@ -52,7 +52,7 @@ export default function CareerRoadmapPage() {
     try {
 
       const response = await fetch(
-        "http://127.0.0.1:8000/generate-roadmap",
+        `${process.env.NEXT_PUBLIC_API_URL}/generate-roadmap`,
         {
           method: "POST",
           headers: {
