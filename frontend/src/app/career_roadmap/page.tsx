@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 
+import ReactMarkdown from "react-markdown";
+
 export default function CareerRoadmapPage() {
 
   const [currentYear, setCurrentYear] = useState("");
@@ -171,17 +173,37 @@ export default function CareerRoadmapPage() {
 
         {roadmap && (
 
-          <div className="bg-zinc-900 border border-zinc-800 p-8 rounded-3xl">
+          <div className="mt-12">
 
-            <h2 className="text-3xl font-bold mb-6">
-              Your AI Career Roadmap
-            </h2>
+            <div className="glass-card p-8">
 
-            <div className="bg-zinc-950 p-6 rounded-2xl overflow-auto">
+              <div className="flex items-center justify-between mb-8">
 
-              <pre className="whitespace-pre-wrap text-zinc-300 leading-8 text-base">
-                {roadmap}
-              </pre>
+                <div>
+
+                  <h2 className="text-4xl font-bold gradient-text">
+                    Your AI Career Roadmap
+                  </h2>
+
+                  <p className="text-zinc-400 mt-2">
+                    Personalized roadmap generated using AI
+                  </p>
+
+                </div>
+
+                <div className="pulse-orb"></div>
+
+              </div>
+
+              <div className="roadmap-content">
+
+                <ReactMarkdown>
+
+                  {roadmap}
+
+                </ReactMarkdown>
+
+              </div>
 
             </div>
 

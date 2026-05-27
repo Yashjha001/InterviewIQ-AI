@@ -7,24 +7,43 @@ def evaluate_answer(
 ):
 
     prompt = f"""
-    You are an expert technical interviewer.
+    You are a senior FAANG technical interviewer.
 
-    Interview Question:
+    Evaluate the candidate answer professionally.
+
+    INTERVIEW QUESTION:
     {question}
 
-    Candidate Answer:
+    CANDIDATE ANSWER:
     {answer}
 
-    Evaluate the answer.
+    Return evaluation in this exact format:
 
-    Give:
+    Score: X/10
 
-    1. Score out of 10
-    2. Strengths
-    3. Weaknesses
-    4. Improvement tips
+    Communication:
+    - Evaluate clarity and confidence
 
-    Keep response concise.
+    Technical Accuracy:
+    - Evaluate correctness and depth
+
+    Strengths:
+    - Mention what was good
+
+    Weaknesses:
+    - Mention missing points
+
+    Expected Strong Answer:
+    - Explain what an ideal candidate should mention
+
+    Improvement Tips:
+    - Give actionable improvement advice
+
+    Hiring Decision:
+    - Reject / Borderline / Hire
+
+    Be highly detailed, realistic, and constructive.
+    Return plain text only.
     """
 
     response = client.chat.completions.create(

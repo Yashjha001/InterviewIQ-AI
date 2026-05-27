@@ -16,3 +16,17 @@ __pycache__/
 
 # OS
 .DS_Store
+
+# Environment files
+.env
+.env.local
+frontend/.env.local
+
+# Next.js
+.next
+
+# Node modules
+node_modules
+
+# Python
+venv

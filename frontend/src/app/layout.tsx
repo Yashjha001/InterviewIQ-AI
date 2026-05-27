@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 
+import { DM_Sans, DM_Mono } from "next/font/google";
+
 import "./globals.css";
 
 import Navbar from "@/components/Navbar";
@@ -13,6 +15,18 @@ export const metadata: Metadata = {
   description: "AI Career Growth Platform",
 };
 
+const dmSans = DM_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "700"],
+  variable: "--font-dm-sans",
+});
+
+const dmMono = DM_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-dm-mono",
+});
+
 export default function RootLayout({
   children,
 }: {
@@ -23,7 +37,7 @@ export default function RootLayout({
 
     <html lang="en">
 
-      <body>
+      <body className={`${dmSans.variable} ${dmMono.variable}`}>
 
         <SessionProviderWrapper>
 
