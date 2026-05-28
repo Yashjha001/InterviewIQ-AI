@@ -29,7 +29,7 @@ UPLOAD_FOLDER = "uploads"
 async def analyze_resume_route(
     file: UploadFile = File(...),
     target_role: str = Form(...),
-    user_id: str = Form("anonymous")
+    user_id: str = Form("guest")
 ):
 
     file_path = os.path.join(

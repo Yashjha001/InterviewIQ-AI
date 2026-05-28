@@ -1,12 +1,14 @@
 import os
 
 from fastapi import FastAPI
-from app.routes.resume import router as resume_router
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes.dashboard import router as dashboard_router
-from app.routes.roadmap import router as roadmap_router
-from app.routes.mock_interview import router as mock_router
-from app.routes.interview import router as interview_router
+from app.routes import (
+    resume_analysis,
+    mock_interview,
+    career_roadmap,
+    dashboard,
+    interview,
+)
 
 app = FastAPI()
 app.add_middleware(
@@ -20,11 +22,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.include_router(resume_router)
-app.include_router(dashboard_router)
-app.include_router(roadmap_router)
-app.include_router(mock_router)
-app.include_router(interview_router)
+app.include_router(resume_analysis.router)
+app.include_router(mock_interview.router)
+app.include_router(career_roadmap.router)
+app.include_router(dashboard.router)
+app.include_router(interview.router)
 
 @app.get("/")
 def home():

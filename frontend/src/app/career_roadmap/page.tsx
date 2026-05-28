@@ -19,7 +19,7 @@ export default function CareerRoadmapPage() {
   const [loading, setLoading] = useState(false);
   const [roadmap, setRoadmap] = useState("");
 
-  const userId = session?.user?.email || "anonymous";
+  const userId = session?.user?.email ?? "guest";
 
   useEffect(() => {
     if (status === "unauthenticated") {

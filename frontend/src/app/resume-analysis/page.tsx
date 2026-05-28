@@ -155,7 +155,7 @@ export default function ResumeAnalysisPage() {
   const [result, setResult] = useState<ResultData | null>(null);
   const [dragOver, setDragOver] = useState(false);
 
-  const userId = session?.user?.email || "anonymous";
+  const userId = session?.user?.email ?? "guest";
 
   useEffect(() => {
     if (status === "unauthenticated") {

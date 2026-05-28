@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 class CareerRoadmapRequest(BaseModel):
 
-    user_id: str = "anonymous"
+    user_id: str = "guest"
     userId: str | None = None
 
     current_year: str
@@ -32,7 +32,7 @@ class CareerRoadmapRequest(BaseModel):
 async def generate_roadmap(
     data: CareerRoadmapRequest
 ):
-    user_id = data.user_id or data.userId or "anonymous"
+    user_id = data.user_id or data.userId or "guest"
 
     roadmap = generate_career_roadmap(
         data.current_year,

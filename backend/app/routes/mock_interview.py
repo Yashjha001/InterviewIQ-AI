@@ -40,7 +40,7 @@ class InterviewRequest(BaseModel):
 
     answer: str
 
-    user_id: str = "anonymous"
+    user_id: str = "guest"
 
 
 class NextQuestionRequest(BaseModel):
@@ -63,7 +63,7 @@ class NextQuestionRequest(BaseModel):
 
     interview_history: list
 
-    user_id: str = "anonymous"
+    user_id: str = "guest"
 
 
 # ==============================
@@ -83,7 +83,7 @@ async def generate_interview(
 
     difficulty: str = Form(...),
 
-    user_id: str = Form("anonymous")
+    user_id: str = Form("guest")
 
 ):
 

@@ -254,7 +254,7 @@ export default function DashboardPage() {
     }
   }, [status, router]);
 
-  const userId = session?.user?.email || "anonymous";
+  const userId = session?.user?.email ?? "guest";
 
   useEffect(() => {
     let cancelled = false;
@@ -264,35 +264,25 @@ export default function DashboardPage() {
     setStatsError(null);
     setDetailsError(null);
 
-    const statsUrl = `${API_URL}/dashboard-data/stats?userId=${encodeURIComponent(userId)}`;
-    const detailsUrl = `${API_URL}/dashboard-data/details?userId=${encodeURIComponent(userId)}`;
+    const dashboardUrl = `${API_URL}/dashboard-data?userId=${encodeURIComponent(userId)}`;
 
-    const statsPromise = fetchWithCache(statsUrl)
+    void fetchWithCache(dashboardUrl)
       .then((data) => {
         if (!cancelled) {
-          setStats(data ?? {});
+          setStats(data?.stats ?? {});
+          setDetails({
+            ats_trend: data?.ats_trend ?? [],
+            interview_scores: data?.interview_scores ?? [],
+            recent_activity: data?.recent_activity ?? [],
+            interview_history: data?.interview_history ?? [],
+            ai_insights: data?.ai_insights ?? [],
+            company_readiness: data?.company_readiness ?? {},
+          });
         }
       })
       .catch(() => {
         if (!cancelled) {
           setStats({ ats_avg: 0, interviews_taken: 0, roadmap_progress: 0, skills_improved: 0 });
-          setStatsError("Unable to load stats right now.");
-        }
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setStatsLoading(false);
-        }
-      });
-
-    const detailsPromise = fetchWithCache(detailsUrl)
-      .then((data) => {
-        if (!cancelled) {
-          setDetails(data ?? {});
-        }
-      })
-      .catch(() => {
-        if (!cancelled) {
           setDetails({
             ats_trend: [],
             interview_scores: [],
@@ -301,16 +291,16 @@ export default function DashboardPage() {
             ai_insights: [],
             company_readiness: {},
           });
+          setStatsError("Unable to load stats right now.");
           setDetailsError("Unable to load dashboard details right now.");
         }
       })
       .finally(() => {
         if (!cancelled) {
+          setStatsLoading(false);
           setDetailsLoading(false);
         }
       });
-
-    void Promise.all([statsPromise, detailsPromise]);
 
     return () => {
       cancelled = true;

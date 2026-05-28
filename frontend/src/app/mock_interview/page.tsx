@@ -218,7 +218,7 @@ export default function MockInterviewPage() {
   const [dragOver, setDragOver] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
 
-  const userId = session?.user?.email || "anonymous";
+  const userId = session?.user?.email ?? "guest";
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -336,22 +336,31 @@ export default function MockInterviewPage() {
 
   const handleEndInterview = async () => {
     try {
+      const averageScore = Math.round(
+        interviewHistory.reduce((sum, h) => {
+          try {
+            const parsed = typeof h.feedback === "string" ? parseFeedback(h.feedback) : (h.feedback as unknown as FeedbackData);
+            return sum + (parsed?.score ?? 0);
+          } catch {
+            return sum;
+          }
+        }, 0) / (interviewHistory.length || 1)
+      );
+
       const completionPayload = {
         user_id: userId,
         target_role: targetRole,
         company,
         interview_type: interviewType,
         difficulty,
-        questions: questions.map((question) => getQuestionText(question)),
+        questions: interviewHistory.map((entry) => entry.question),
         answers: interviewHistory.map((entry) => entry.answer),
-        scores: interviewHistory.map((entry) => {
-          const parsed = parseFeedback(entry.feedback);
-          return parsed?.score ? Math.round(parsed.score) : 0;
-        }),
         feedback: interviewHistory.map((entry) => entry.feedback),
+        avg_score: averageScore,
+        createdAt: new Date().toISOString(),
       };
 
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/complete-interview`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/save-interview-session`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(completionPayload),

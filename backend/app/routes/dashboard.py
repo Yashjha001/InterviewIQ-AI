@@ -19,6 +19,10 @@ _dashboard_cache: dict = {}
 CACHE_TTL = 60
 
 
+def _user_filter(user_id: str) -> dict:
+    return {"$or": [{"userId": user_id}, {"user_id": user_id}]}
+
+
 def _clamp_score(value: float) -> int:
     return max(0, min(100, int(round(value))))
 
@@ -96,11 +100,12 @@ async def _build_dashboard_stats(user_id: str):
         return payload
 
     try:
+        user_filter = _user_filter(user_id)
         resume_docs, interview_count, roadmap_docs, skill_docs = await asyncio.gather(
-            resume_reports.find({"userId": user_id}).sort("createdAt", -1).to_list(length=100),
-            interviews.count_documents({"userId": user_id}),
-            roadmap_history.find({"userId": user_id}).sort("createdAt", -1).to_list(length=100),
-            resume_reports.find({"userId": user_id}, {"matched_skills": 1}).sort("createdAt", -1).to_list(length=100),
+            resume_reports.find(user_filter).sort("createdAt", -1).to_list(length=100),
+            interviews.count_documents(user_filter),
+            roadmap_history.find(user_filter).sort("createdAt", -1).to_list(length=100),
+            resume_reports.find(user_filter, {"matched_skills": 1}).sort("createdAt", -1).to_list(length=100),
         )
     except Exception:
         resume_docs, interview_count, roadmap_docs, skill_docs = [], 0, [], []
@@ -138,10 +143,11 @@ async def _build_dashboard_details(user_id: str):
         return payload
 
     try:
+        user_filter = _user_filter(user_id)
         resume_docs, interview_docs, roadmap_docs, activity_docs, insight_docs = await asyncio.gather(
-            resume_reports.find({"userId": user_id}).sort("createdAt", -1).to_list(length=7),
-            interviews.find({"userId": user_id}).sort("createdAt", -1).to_list(length=7),
-            roadmap_history.find({"userId": user_id}).sort("createdAt", -1).to_list(length=7),
+            resume_reports.find(user_filter).sort("createdAt", -1).to_list(length=7),
+            interviews.find(user_filter).sort("createdAt", -1).to_list(length=7),
+            roadmap_history.find(user_filter).sort("createdAt", -1).to_list(length=7),
             activity_log.find({"userId": user_id}).sort("createdAt", -1).limit(10).to_list(length=10),
             activity_log.find({"userId": user_id, "type": "insight"}).sort("createdAt", -1).limit(5).to_list(length=5),
         )
@@ -237,7 +243,7 @@ async def _build_dashboard_details(user_id: str):
 
 @router.get("/dashboard-data")
 async def dashboard_data(
-    userId: str = Query(""),
+    userId: str = Query("guest"),
     db_instance=Depends(get_db),
 ):
     stats_payload, details_payload = await asyncio.gather(
@@ -249,7 +255,7 @@ async def dashboard_data(
 
 @router.get("/dashboard-data/stats")
 async def dashboard_stats(
-    userId: str = Query(""),
+    userId: str = Query("guest"),
     db_instance=Depends(get_db),
 ):
     return await _build_dashboard_stats(userId)
@@ -257,7 +263,7 @@ async def dashboard_stats(
 
 @router.get("/dashboard-data/details")
 async def dashboard_details(
-    userId: str = Query(""),
+    userId: str = Query("guest"),
     db_instance=Depends(get_db),
 ):
     return await _build_dashboard_details(userId)
