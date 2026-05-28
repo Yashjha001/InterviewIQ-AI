@@ -254,11 +254,9 @@ export default function DashboardPage() {
     }
   }, [status, router]);
 
-  const userId = session?.user?.id;
+  const userId = session?.user?.email || "anonymous";
 
   useEffect(() => {
-    if (!userId) return;
-
     let cancelled = false;
 
     setStatsLoading(true);

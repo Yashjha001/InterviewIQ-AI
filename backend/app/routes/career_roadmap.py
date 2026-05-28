@@ -16,7 +16,8 @@ logger = logging.getLogger(__name__)
 
 class CareerRoadmapRequest(BaseModel):
 
-    userId: str
+    user_id: str = "anonymous"
+    userId: str | None = None
 
     current_year: str
 
@@ -31,6 +32,7 @@ class CareerRoadmapRequest(BaseModel):
 async def generate_roadmap(
     data: CareerRoadmapRequest
 ):
+    user_id = data.user_id or data.userId or "anonymous"
 
     roadmap = generate_career_roadmap(
         data.current_year,
@@ -42,7 +44,7 @@ async def generate_roadmap(
     try:
         await roadmap_history.insert_one(
             {
-                "userId": data.userId,
+                "userId": user_id,
                 "career_goal": data.career_goal,
                 "current_year": data.current_year,
                 "timeline": data.timeline,
@@ -52,9 +54,10 @@ async def generate_roadmap(
                 "createdAt": datetime.now(timezone.utc),
             }
         )
+        logger.info("Saved to MongoDB for userId: %s", user_id)
         await activity_log.insert_one(
             {
-                "userId": data.userId,
+                "userId": user_id,
                 "action": "Roadmap Generated",
                 "detail": f"Goal: {data.career_goal} | Timeline: {data.timeline}",
                 "createdAt": datetime.now(timezone.utc),
@@ -62,14 +65,14 @@ async def generate_roadmap(
         )
         await activity_log.insert_one(
             {
-                "userId": data.userId,
+                "userId": user_id,
                 "type": "insight",
                 "text": f"Roadmap created for {data.career_goal} ({data.timeline})",
                 "createdAt": datetime.now(timezone.utc),
             }
         )
     except Exception:
-        logger.exception("Failed to persist roadmap for user %s", data.userId)
+        logger.exception("Failed to persist roadmap for user %s", user_id)
 
     return {
         "roadmap": roadmap

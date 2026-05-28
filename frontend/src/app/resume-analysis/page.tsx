@@ -155,7 +155,7 @@ export default function ResumeAnalysisPage() {
   const [result, setResult] = useState<ResultData | null>(null);
   const [dragOver, setDragOver] = useState(false);
 
-  const userId = session?.user?.id || session?.user?.email || "";
+  const userId = session?.user?.email || "anonymous";
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -181,7 +181,7 @@ export default function ResumeAnalysisPage() {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("target_role", targetRole);
-    formData.append("userId", userId);
+    formData.append("user_id", userId);
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/analyze-resume`, {
         method: "POST",

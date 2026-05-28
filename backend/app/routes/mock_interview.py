@@ -8,6 +8,10 @@ from fastapi import (
 from pydantic import BaseModel
 
 import pdfplumber
+import logging
+from datetime import datetime, timezone
+
+from app.db.mongodb import activity_log
 
 from app.services.interview_generator import (
     generate_interview_questions
@@ -24,6 +28,7 @@ from app.services.adaptive_interview import (
 # ROUTER
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 # ==============================
 # REQUEST MODELS
@@ -34,6 +39,8 @@ class InterviewRequest(BaseModel):
     question: str
 
     answer: str
+
+    user_id: str = "anonymous"
 
 
 class NextQuestionRequest(BaseModel):
@@ -56,6 +63,8 @@ class NextQuestionRequest(BaseModel):
 
     interview_history: list
 
+    user_id: str = "anonymous"
+
 
 # ==============================
 # GENERATE INITIAL INTERVIEW
@@ -72,7 +81,9 @@ async def generate_interview(
 
     interview_type: str = Form(...),
 
-    difficulty: str = Form(...)
+    difficulty: str = Form(...),
+
+    user_id: str = Form("anonymous")
 
 ):
 
@@ -91,6 +102,19 @@ async def generate_interview(
         interview_type,
         difficulty
     )
+
+    try:
+        await activity_log.insert_one(
+            {
+                "userId": user_id,
+                "action": "Mock Interview Generated",
+                "detail": f"{interview_type} interview for {target_role} at {company}",
+                "createdAt": datetime.now(timezone.utc),
+            }
+        )
+        logger.info("Saved to MongoDB for userId: %s", user_id)
+    except Exception:
+        logger.exception("Failed to persist mock interview generation for user %s", user_id)
 
     return questions
 

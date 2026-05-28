@@ -46,7 +46,7 @@ async def upload_resume(file: UploadFile = File(...)):
 async def analyze_resume_route(
     file: UploadFile = File(...),
     target_role: str = Form(...),
-    userId: str = Form(...),
+    user_id: str = Form("anonymous"),
 ):
 
     file_path = os.path.join(UPLOAD_FOLDER, file.filename)
@@ -74,7 +74,7 @@ async def analyze_resume_route(
     try:
         await resume_reports.insert_one(
             {
-                "userId": userId,
+                "userId": user_id,
                 "target_role": target_role,
                 "ats_score": int(analysis.get("ats_score", 0)),
                 "matched_skills": analysis.get("matched_skills", []),
@@ -83,9 +83,10 @@ async def analyze_resume_route(
                 "createdAt": datetime.now(timezone.utc),
             }
         )
+        logger.info("Saved to MongoDB for userId: %s", user_id)
         await activity_log.insert_one(
             {
-                "userId": userId,
+                "userId": user_id,
                 "action": "Resume Analyzed",
                 "detail": f"ATS Score: {analysis.get('ats_score', 0)}% for {target_role}",
                 "createdAt": datetime.now(timezone.utc),
@@ -93,14 +94,14 @@ async def analyze_resume_route(
         )
         await activity_log.insert_one(
             {
-                "userId": userId,
+                "userId": user_id,
                 "type": "insight",
                 "text": f"ATS score {analysis.get('ats_score', 0)}% achieved for {target_role}",
                 "createdAt": datetime.now(timezone.utc),
             }
         )
     except Exception:
-        logger.exception("Failed to persist resume analysis for user %s", userId)
+        logger.exception("Failed to persist resume analysis for user %s", user_id)
 
     return {
         "filename": file.filename,

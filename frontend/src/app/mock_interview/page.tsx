@@ -218,7 +218,7 @@ export default function MockInterviewPage() {
   const [dragOver, setDragOver] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
 
-  const userId = session?.user?.id || session?.user?.email || "";
+  const userId = session?.user?.email || "anonymous";
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -251,7 +251,7 @@ export default function MockInterviewPage() {
     formData.append("company", company);
     formData.append("interview_type", interviewType);
     formData.append("difficulty", difficulty);
-    formData.append("userId", userId);
+    formData.append("user_id", userId);
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/generate-interview`, { method: "POST", body: formData });
       const data = await res.json();
@@ -287,7 +287,7 @@ export default function MockInterviewPage() {
       const evalRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/evaluate-answer`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: questionText, answer }),
+        body: JSON.stringify({ question: questionText, answer, user_id: userId }),
       });
 
       const evalData = await evalRes.json();
@@ -317,6 +317,7 @@ export default function MockInterviewPage() {
           candidate_answer: answer,
           previous_feedback: evalData.feedback || "",
           interview_history: [...interviewHistory, { question: questionText, answer, feedback: evalData.feedback || "" }],
+          user_id: userId,
         }),
       });
 
@@ -336,7 +337,7 @@ export default function MockInterviewPage() {
   const handleEndInterview = async () => {
     try {
       const completionPayload = {
-        userId,
+        user_id: userId,
         target_role: targetRole,
         company,
         interview_type: interviewType,
